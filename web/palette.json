@@ -1,0 +1,38 @@
+{
+  "mode": "auto",
+  "id": "e65662-e7a26a-f6accd-8c8109a8ad20",
+  "identity": "https://github.com/supermarioyl/quantproof",
+  "primary": "#e65662",
+  "secondary": "#e7a26a",
+  "highlight": "#f6accd",
+  "dark": {
+    "bg": "#0a070d",
+    "panel": "#131018",
+    "code": "#140d14",
+    "ink": "#fdeef5",
+    "muted": "#b29caa",
+    "line": "#3a1820",
+    "primary": "#e65662",
+    "secondary": "#e7a26a",
+    "highlight": "#f6accd",
+    "accent": "#e65662",
+    "buttonStart": "#ca4b56",
+    "buttonEnd": "#9b6c47",
+    "buttonText": "#ffffff"
+  },
+  "light": {
+    "bg": "#fef9fa",
+    "panel": "#fef7f7",
+    "code": "#fdf3f4",
+    "ink": "#27161d",
+    "muted": "#725e6d",
+    "line": "#f7cbcf",
+    "primary": "#bf4852",
+    "secondary": "#946744",
+    "highlight": "#906478",
+    "accent": "#bf4852",
+    "buttonStart": "#ca4b56",
+    "buttonEnd": "#9b6c47",
+    "buttonText": "#ffffff"
+  }
+}

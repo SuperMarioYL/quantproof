@@ -1,0 +1,319 @@
+{
+  "schema": 3,
+  "name": "QuantProof",
+  "github": "https://github.com/SuperMarioYL/quantproof",
+  "host": "quantproof.lei6393.com",
+  "palette": "auto",
+  "lang": {
+    "primary": "en",
+    "toggle": true
+  },
+  "meta": {
+    "visual_profile": "neon-particle",
+    "demo_source": "docs/demo-results.json",
+    "content_version": "v0.1.0",
+    "implementation_version": "0.1.0"
+  },
+  "hero": {
+    "eyebrow": {
+      "en": "LOCAL QUANT CALIBRATION · MIT",
+      "zh": "本地量化校准 · MIT"
+    },
+    "headline": {
+      "en": "Rank every quant variant\non your own tasks",
+      "zh": "用量化档位跑你自己的任务，\n排出高下"
+    },
+    "sub": {
+      "en": "QuantProof runs each local GGUF variant of one model against your task pack and prints pass rate, speed and the collapse delta versus the best variant — the row no blog table can print.",
+      "zh": "QuantProof 把同一个模型的每个本地 GGUF 量化档位跑一遍你的任务包，输出通过率、速度和相对最优档位的坍缩差值——这是任何博客表格都印不出来的那一行。"
+    },
+    "href": "#quickstart",
+    "command": "quantproof rank --gguf Q4_K_M.gguf IQ2_XXS.gguf --tasks ./tasks",
+    "cta": {
+      "en": "Run the demo",
+      "zh": "运行示例"
+    },
+    "ctaGithub": {
+      "en": "View source",
+      "zh": "查看源码"
+    }
+  },
+  "scene": {
+    "kind": "neon-graph",
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg",
+    "caption": {
+      "en": "Your tasks in, a ranked verdict out",
+      "zh": "你的任务进，排好序的结论出"
+    }
+  },
+  "advantages": [
+    {
+      "title": {
+        "en": "The row no blog table can print",
+        "zh": "博客表格印不出的那一行"
+      },
+      "body": {
+        "en": "IQ2_XXS: -40 pp pass rate on your tasks. Published benchmarks rank variants on their author's tasks; the collapse that decides your choice is the one on your workload.",
+        "zh": "IQ2_XXS：在你的任务上 -40 个百分点的通过率。公开评测排的是作者的任务；真正决定你选哪个档位的，是它在你自己负载上的坍缩。"
+      }
+    },
+    {
+      "title": {
+        "en": "Deterministic graders, no LLM-as-judge",
+        "zh": "确定性判分，不用 LLM 当裁判"
+      },
+      "body": {
+        "en": "Code tasks are graded by their own test commands (compile, run, diff); QA tasks by exact substring. Same pack, same verdict, every rerun.",
+        "zh": "代码任务用它自带的测试命令判分（编译、运行、diff），问答任务用精确子串。同一个任务包，每次重跑结论一致。"
+      }
+    },
+    {
+      "title": {
+        "en": "Unattended overnight, one server at a time",
+        "zh": "整夜无人值守，一次只起一个服务"
+      },
+      "body": {
+        "en": "A single CLI spawns one llama-server child per variant, samples k times per task, kills it and moves on. No daemon, no database, no telemetry.",
+        "zh": "一个 CLI，每个档位起一个 llama-server 子进程，每个任务采样 k 次，跑完即退、换下一个。没有守护进程、没有数据库、没有遥测。"
+      }
+    }
+  ],
+  "story": {
+    "intro": {
+      "title": {
+        "en": "Twenty variants, one 16 GB card, your decision",
+        "zh": "二十个档位、一张 16 GB 显卡、你的选择"
+      },
+      "body": {
+        "en": "A hot open-weight release immediately spawns 20+ community quants — each one click to download, one day of GPU time to judge. Published tables tell you 4-bit broadly holds and 1-bit collapses, but on whose code? The only reliable way to pick has been to benchmark each variant on your own workload by hand, for days. QuantProof is that loop, automated: your prompts, deterministic graders, every variant of one model, ranked by morning.",
+        "zh": "一个热门开源权重发布，几天内就会长出二十多个社区量化版本——下载只要一次点击，判断却要一天 GPU 时间。公开表格能告诉你 4-bit 大体守得住、1-bit 会塌，但那是用谁的代码测的？过去唯一的选法，是拿自己的负载逐个手测，一测几天。QuantProof 把这个循环自动化：你的提示词、确定性判分、一个模型的所有档位，天亮出排名。"
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "en": "From task pack to ranked table",
+          "zh": "从任务包到排名表"
+        },
+        "body": {
+          "en": "quantproof init scaffolds ./tasks with a 10-task example pack (C programs graded by cc + diff, QA graded by substring). rank then loads the pack, resolves your --gguf files into variant labels parsed from their filenames, and for each variant spawns llama-server, waits for /health, draws k samples per task over /v1/chat/completions, grades them, kills the server and moves on. The terminal gets the ranked table — pass rate, tok/s, size — plus the collapse delta versus the best variant and a per-task matrix showing exactly which tasks fell.",
+          "zh": "quantproof init 会用内置的 10 题示例包（C 程序用 cc + diff 判分，问答用子串判分）生成 ./tasks。rank 加载任务包，把 --gguf 传入的文件按文件名解析成档位标签，然后逐个档位：启动 llama-server、等 /health 就绪、通过 /v1/chat/completions 每个任务采样 k 次、判分、关掉服务、换下一个。终端输出排名表——通过率、tok/s、体积——加上相对最优档位的坍缩差值，和一张逐任务矩阵，精确到哪几道题塌了。"
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "en": "The calibration loop: load pack, run each variant through llama-server, grade, rank with collapse deltas",
+            "zh": "校准循环：加载任务包，逐档位跑 llama-server，判分，带坍缩差值排名"
+          },
+          "mobile": {
+            "light": "/assets/presentation/process-mobile-light.svg",
+            "dark": "/assets/presentation/process-mobile-dark.svg"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "One small process, state on disk",
+          "zh": "一个小进程，状态在磁盘"
+        },
+        "body": {
+          "en": "No daemon, no database, no cloud calls. resolve turns local GGUF paths into variant identities; runner owns the llama-server child process and the OpenAI-compatible client; grader extracts the first fenced code block into an isolated temp directory and runs the task's own test command there; report aggregates samples into the calibration — score, tok/s, per-task rates, and the delta of every variant against the best one that ran.",
+          "zh": "没有守护进程、没有数据库、没有云调用。resolve 把本地 GGUF 路径解析成档位身份；runner 管理 llama-server 子进程和 OpenAI 兼容客户端；grader 把回复里的第一个代码块抽到隔离临时目录，在那里跑任务自带的测试命令；report 把样本汇总成校准结果——分数、tok/s、逐任务通过率，以及每个档位相对最优档位的差值。"
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "en": "Architecture: resolve, runner, grader and report around one llama-server child",
+            "zh": "架构：围绕单个 llama-server 子进程的 resolve、runner、grader、report"
+          },
+          "mobile": {
+            "light": "/assets/presentation/architecture-mobile-light.svg",
+            "dark": "/assets/presentation/architecture-mobile-dark.svg"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "What plugs in today",
+          "zh": "今天能接什么"
+        },
+        "body": {
+          "en": "v0.1 works with GGUF files you already have on disk and llama.cpp's llama-server on PATH — any model, any quantizer, because the pack and the graders are model-agnostic. Task packs are plain tasks.json you author; the example packs ship under examples/. Auto-download from a GGUF repo (honoring HF_ENDPOINT mirrors), resumable runs and the gistable report.md are m2 and not implemented yet.",
+          "zh": "v0.1 直接用你磁盘上已有的 GGUF 文件和 PATH 里的 llama.cpp llama-server——任意模型、任意量化作者，因为任务包和判分器与模型无关。任务包就是你自己写的 tasks.json，示例包在 examples/ 下。从 GGUF 仓库自动下载（支持 HF_ENDPOINT 镜像）、断点续跑和可分享的 report.md 属于 m2，尚未实现。"
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "en": "What plugs in: local GGUF files, llama-server, shell test commands, task packs",
+            "zh": "当前接入：本地 GGUF 文件、llama-server、shell 测试命令、任务包"
+          },
+          "mobile": {
+            "light": "/assets/presentation/integrations-mobile-light.svg",
+            "dark": "/assets/presentation/integrations-mobile-dark.svg"
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "en": "Commands and options",
+          "zh": "命令与选项"
+        },
+        "body": {
+          "en": "doctor checks llama-server and GPU visibility; init scaffolds the example pack; rank runs the calibration. rank options: --gguf (repeat, or pass several space-separated), --tasks, --k to override the pack's samples per task, --port (default 8111), --startup-timeout, and --server-bin for a llama-server-compatible wrapper.",
+          "zh": "doctor 检查 llama-server 与 GPU；init 生成示例任务包；rank 跑校准。rank 的选项：--gguf（可重复传，也可以空格连传多个）、--tasks、--k 覆盖每个任务的采样次数、--port（默认 8111）、--startup-timeout，以及用于兼容包装器的 --server-bin。"
+        },
+        "code": "quantproof doctor\nquantproof init\nquantproof rank --gguf Q4_K_M.gguf IQ2_XXS.gguf IQ1_S.gguf --tasks ./tasks"
+      },
+      {
+        "title": {
+          "en": "Configuration and limits",
+          "zh": "配置与边界"
+        },
+        "body": {
+          "en": "Task-pack fields: base_model (informational), k_samples, and tasks with id, prompt and a grader — codeblock (test_cmd, optional filename, timeout_s) or contains (expected). Code graders run shell commands you wrote, with the same trust as CI scripts. v0.1 is llama.cpp-only, deterministic-graders-only, local-files-only.",
+          "zh": "任务包字段：base_model（仅记录用）、k_samples，以及带 id、prompt 和判分器的任务——codeblock（test_cmd，可选 filename、timeout_s）或 contains（expected）。代码判分器会执行你写的 shell 命令，信任级别与 CI 脚本相同。v0.1 仅支持 llama.cpp、仅确定性判分、仅本地文件。"
+        },
+        "code": "python -m pip install -e \".[test]\"\npython -m pytest"
+      }
+    ]
+  },
+  "demo": {
+    "title": {
+      "en": "Recorded run",
+      "zh": "真实运行记录"
+    },
+    "note": {
+      "en": "Commands and outputs below are copied verbatim from a real 0.1.0 run captured non-interactively. llama-server was not installed on the recording machine, so step 3 substitutes the deterministic stub server from tests/ via --server-bin: spawn, health wait, sampling, both graders and the collapse-delta table are the real code paths, but pass rates and tok/s demonstrate the pipeline, not quant quality.",
+      "zh": "以下命令与输出逐字复制自 0.1.0 的真实运行（非交互捕获，进度条显示为普通状态行）。录制机器上没有安装 llama-server，第 3 步用 tests/ 下的确定性 stub 服务通过 --server-bin 代替：进程管理、健康检查、采样、两种判分器和坍缩差值表都是真实代码路径，但通过率与 tok/s 展示的是流水线机制，不代表量化质量。"
+    },
+    "source": "https://github.com/SuperMarioYL/quantproof/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": {
+          "en": "Scaffold the task pack",
+          "zh": "生成任务包"
+        },
+        "body": {
+          "en": "Zero authoring to start: the bundled 10-task example pack lands in ./tasks.",
+          "zh": "零编写成本：内置的 10 题示例包直接落到 ./tasks。"
+        },
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg",
+        "command": "quantproof init",
+        "output": "example pack written to tasks/tasks.json\n10 tasks (5 C-coding with test commands, 5 general-QA with contains checks), k=3\n\nnext: point rank at your GGUFs —\n  quantproof rank --gguf model.Q4_K_M.gguf model.IQ2_XXS.gguf --tasks tasks\n"
+      },
+      {
+        "label": {
+          "en": "Check the environment",
+          "zh": "检查环境"
+        },
+        "body": {
+          "en": "doctor reports the missing llama-server with install hints (exit 1) and the detected GPU.",
+          "zh": "doctor 报告 llama-server 缺失并给出安装提示（退出码 1），同时报告检测到的 GPU。"
+        },
+        "image": "/assets/presentation/demo-1-light.svg",
+        "imageDark": "/assets/presentation/demo-1-dark.svg",
+        "command": "quantproof doctor",
+        "output": "llama-server: NOT FOUND\ninstall llama.cpp first, e.g.:\n  macOS:  brew install llama.cpp\n  Linux:  grab a prebuilt binary or build from source:\n          https://github.com/ggml-org/llama.cpp/releases\ngpu: Apple Silicon GPU (llama.cpp uses Metal automatically)\npython: 3.12.13 (Darwin)\nquantproof: 0.1.0\n"
+      },
+      {
+        "label": {
+          "en": "Rank two variants",
+          "zh": "给两个档位排名"
+        },
+        "body": {
+          "en": "The ranked table with the collapse delta and the per-task matrix, from the full pipeline over the stub server.",
+          "zh": "带坍缩差值的排名表和逐任务矩阵，来自在 stub 服务上跑通的完整流水线。"
+        },
+        "image": "/assets/presentation/demo-2-light.svg",
+        "imageDark": "/assets/presentation/demo-2-dark.svg",
+        "command": "printf '(stub)' > Q4_K_M.demo.gguf && printf '(stub)' > IQ2_XXS.demo.gguf && quantproof rank --gguf Q4_K_M.demo.gguf IQ2_XXS.demo.gguf --tasks ./tasks --server-bin \"python3 tests/stub_llama_server.py\"",
+        "output": "\nvariant 1/2: Q4_K_M (Q4_K_M.demo.gguf, 0.00 GB)\nrunning 30 samples ...\n\nvariant 2/2: IQ2_XXS (IQ2_XXS.demo.gguf, 0.00 GB)\nrunning 30 samples ...\n\nQuantProof — 10 tasks x k=3 per variant, base model: Qwen/Qwen3.8-27B\n        Quant calibration — ranked on your tasks        \n┏━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━┓\n┃ Variant ┃ Pass rate ┃ Δ vs best ┃  tok/s ┃ Size (GB) ┃\n┡━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━┩\n│ Q4_K_M  │    100.0% │  baseline │ 9673.7 │      0.00 │\n│ IQ2_XXS │     60.0% │  -40.0 pp │ 8702.7 │      0.00 │\n└─────────┴───────────┴───────────┴────────┴───────────┘\ncollapse: IQ2_XXS (-40.0 pp) versus Q4_K_M on your tasks\nPer-task pass rate (passed samples / k) \n┏━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ Task  ┃ Grader    ┃ Q4_K_M ┃ IQ2_XXS ┃\n┡━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│ c-01  │ codeblock │  3/3   │   0/3   │\n│ c-02  │ codeblock │  3/3   │   0/3   │\n│ c-03  │ codeblock │  3/3   │   0/3   │\n│ c-04  │ codeblock │  3/3   │   3/3   │\n│ c-05  │ codeblock │  3/3   │   3/3   │\n│ qa-01 │ contains  │  3/3   │   0/3   │\n│ qa-02 │ contains  │  3/3   │   3/3   │\n│ qa-03 │ contains  │  3/3   │   3/3   │\n│ qa-04 │ contains  │  3/3   │   3/3   │\n│ qa-05 │ contains  │  3/3   │   3/3   │\n└───────┴───────────┴────────┴─────────┘\n"
+      }
+    ]
+  },
+  "quickstart": {
+    "title": {
+      "en": "From clone to first ranked table",
+      "zh": "从克隆到第一张排名表"
+    },
+    "body": {
+      "en": "Requires Python 3.12+ and llama.cpp's llama-server for real runs. Without llama-server, the stub demo below still exercises the whole pipeline.",
+      "zh": "需要 Python 3.12+；真实运行还需要 llama.cpp 的 llama-server。没有 llama-server 时，下面的 stub 示例也能跑通完整流水线。"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Install",
+          "zh": "安装"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/quantproof.git\ncd quantproof\npython3 -m venv .venv && source .venv/bin/activate\npython -m pip install -e ."
+      },
+      {
+        "title": {
+          "en": "Scaffold the example pack",
+          "zh": "生成示例任务包"
+        },
+        "code": "quantproof init"
+      },
+      {
+        "title": {
+          "en": "Try the pipeline (stub server, no llama-server needed)",
+          "zh": "先跑通流水线（stub 服务，无需 llama-server）"
+        },
+        "code": "printf '(stub)' > Q4_K_M.demo.gguf && printf '(stub)' > IQ2_XXS.demo.gguf && \\\n  quantproof rank --gguf Q4_K_M.demo.gguf IQ2_XXS.demo.gguf --tasks ./tasks \\\n  --server-bin \"python3 tests/stub_llama_server.py\""
+      },
+      {
+        "title": {
+          "en": "Run it for real",
+          "zh": "真实运行"
+        },
+        "code": "quantproof rank --gguf model.Q4_K_M.gguf model.IQ2_XXS.gguf --tasks ./tasks"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "en": "v0.1 works with GGUF files already on disk; downloading variants from a GGUF repo (--gguf-repo / --quants) is m2 and not implemented.",
+      "zh": "v0.1 只用磁盘上已有的 GGUF 文件；从 GGUF 仓库下载档位（--gguf-repo / --quants）属于 m2，尚未实现。"
+    },
+    {
+      "en": "llama.cpp llama-server is the only backend; no Ollama, vLLM or transformers in v0.1.",
+      "zh": "v0.1 仅支持 llama.cpp llama-server 后端；不支持 Ollama、vLLM 或 transformers。"
+    },
+    {
+      "en": "Graders are deterministic only (shell test commands and substring checks); no LLM-as-judge.",
+      "zh": "判分只做确定性（shell 测试命令与子串检查）；不使用 LLM 裁判。"
+    },
+    {
+      "en": "The gistable report.md and results.json artifacts and crash-resumable runs are m2; v0.1 prints the terminal report only.",
+      "zh": "可分享的 report.md、results.json 产物与断点续跑属于 m2；v0.1 只输出终端报告。"
+    }
+  ],
+  "cta": {
+    "headline": {
+      "en": "Your tasks decide the quant",
+      "zh": "你的任务，决定你的量化档位"
+    },
+    "sub": {
+      "en": "Free, MIT, no accounts, no telemetry.",
+      "zh": "免费、MIT、无账号、无遥测。"
+    },
+    "button": {
+      "en": "Get started on GitHub",
+      "zh": "在 GitHub 上开始"
+    }
+  },
+  "footer": {
+    "tag": {
+      "en": "Local GGUFs in, a ranked verdict out — one llama-server at a time.",
+      "zh": "本地 GGUF 进，排好序的结论出——一次一个 llama-server。"
+    }
+  }
+}

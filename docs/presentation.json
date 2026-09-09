@@ -1,0 +1,53 @@
+{
+  "name": "QuantProof",
+  "tagline": "Every quant variant of one model, scored on your task pack — pass rate, tok/s and the collapse delta.",
+  "hero_note": "illustrative motif; the recorded run ships as docs/demo-results.json",
+  "hero_bars": [
+    { "label": "Q4_K_M", "rate": 100, "note": "baseline" },
+    { "label": "Q2_K", "rate": 72, "note": "-28.0 pp" },
+    { "label": "IQ2_XXS", "rate": 60, "note": "-40.0 pp" }
+  ],
+  "architecture": {
+    "title": "One CLI, one llama-server child, state on disk",
+    "nodes": [
+      { "title": "resolve", "detail": "Local .gguf paths -> variant labels + sizes." },
+      { "title": "runner", "detail": "Spawns llama-server, waits /health, samples k per task." },
+      { "title": "grader", "detail": "Code block -> temp dir + test_cmd; QA: substring." },
+      { "title": "report", "detail": "Score, tok/s, per-task rates; collapse deltas vs best." }
+    ],
+    "edges": [[0, 1], [1, 2], [2, 3]],
+    "inputs": [
+      { "title": "tasks.json", "detail": "your prompts + graders" },
+      { "title": "*.gguf", "detail": "the variants you already have" }
+    ],
+    "child": {
+      "title": "llama-server child",
+      "detail": "one at a time: spawn -> /health -> serve -> terminate"
+    },
+    "output": { "title": "terminal", "detail": "ranked table + collapse flags" }
+  },
+  "process": {
+    "title": "The calibration loop, unattended",
+    "steps": [
+      { "title": "Load the pack", "detail": "tasks.json: prompts, graders, k samples per task." },
+      { "title": "Start llama-server", "detail": "One child per variant; wait for /health." },
+      { "title": "Draw k samples", "detail": "/v1/chat/completions, per task, per sample." },
+      { "title": "Grade deterministically", "detail": "Code: temp dir + test command. QA: substring." },
+      { "title": "Swap the variant", "detail": "Terminate the server, load the next .gguf." }
+    ],
+    "loop_label": "steps 2-5 repeat for every variant",
+    "result": "Ranked table: variant | pass rate | Δ vs best | tok/s — with per-variant collapse flags and a per-task matrix."
+  },
+  "integrations": {
+    "title": "What plugs in today",
+    "hub": { "title": "your task pack", "detail": "tasks.json — portable, user-owned" },
+    "items": [
+      { "title": "Local GGUF files", "detail": "Any model, any quantizer; labels parsed from filenames." },
+      { "title": "llama.cpp llama-server", "detail": "The v0.1 backend, via its OpenAI-compatible API." },
+      { "title": "Shell test commands", "detail": "cc, diff, grep — CI-style checks grade code answers." },
+      { "title": "Substring checks", "detail": "Deterministic QA grading, no LLM-as-judge." },
+      { "title": "Example packs", "detail": "examples/c-coding, examples/general-qa, bundled 10-task pack." },
+      { "title": "Terminal table", "detail": "rich-ranked output with collapse deltas; report.md is m2." }
+    ]
+  }
+}
