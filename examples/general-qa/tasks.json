@@ -1,0 +1,31 @@
+{
+  "base_model": "Qwen/Qwen3.8-27B",
+  "k_samples": 3,
+  "tasks": [
+    {
+      "id": "qa-01",
+      "prompt": "What is the capital of France? Reply with just the city name.",
+      "grader": { "type": "contains", "expected": "Paris" }
+    },
+    {
+      "id": "qa-02",
+      "prompt": "Which planet in the solar system is closest to the Sun? Reply with just the planet name.",
+      "grader": { "type": "contains", "expected": "Mercury" }
+    },
+    {
+      "id": "qa-03",
+      "prompt": "In which year did the first crewed Moon landing happen? Reply with just the year.",
+      "grader": { "type": "contains", "expected": "1969" }
+    },
+    {
+      "id": "qa-04",
+      "prompt": "What is the tallest known volcano in the solar system? Reply with just its name.",
+      "grader": { "type": "contains", "expected": "Olympus Mons" }
+    },
+    {
+      "id": "qa-05",
+      "prompt": "What is the name of the physical constant equal to 6.02214076 x 10^23 per mole? Reply with just the name.",
+      "grader": { "type": "contains", "expected": "Avogadro" }
+    }
+  ]
+}
