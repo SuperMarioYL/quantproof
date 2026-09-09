@@ -1,0 +1,26 @@
+# Product site — rendered by the central web-factory reusable workflow.
+# Content lives in web/site.json (+ web/assets/); the renderer is pinned to an
+# immutable commit so this project never drifts with a shared moving tag.
+name: site
+
+on:
+  push:
+    branches: [main]
+    paths: ['web/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages-${{ github.ref }}'
+  cancel-in-progress: false
+
+jobs:
+  site:
+    uses: SuperMarioYL/web-factory/.github/workflows/build-site.yml@03e7ec8a416f868b847d13b3023bf7d1215db767
+    with:
+      factory_ref: 03e7ec8a416f868b847d13b3023bf7d1215db767
+      web_dir: web
