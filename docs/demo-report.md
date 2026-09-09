@@ -43,9 +43,27 @@ collapse: IQ2_XXS (-40.0 pp) versus Q4_K_M on your tasks
 
 tok/s comes from response latency and token counts, so it varies per machine;
 the stub answers in ~1 ms, which is why the numbers are in the thousands. The
-per-task matrix from the same run shows where the stub's degradation bites
-(c-01, c-02, c-03, qa-01 drop to 0/3 while the rest hold at 3/3) — the same
-table shape a real collapse produces.
+per-task matrix from the same run shows where the stub's degradation bites —
+c-01, c-02, c-03 and qa-01 drop to 0/3 while the rest hold at 3/3, the same
+table shape a real collapse produces:
+
+```text
+Per-task pass rate (passed samples / k)
+┏━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓
+┃ Task  ┃ Grader    ┃ Q4_K_M ┃ IQ2_XXS ┃
+┡━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩
+│ c-01  │ codeblock │  3/3   │   0/3   │
+│ c-02  │ codeblock │  3/3   │   0/3   │
+│ c-03  │ codeblock │  3/3   │   0/3   │
+│ c-04  │ codeblock │  3/3   │   3/3   │
+│ c-05  │ codeblock │  3/3   │   3/3   │
+│ qa-01 │ contains  │  3/3   │   0/3   │
+│ qa-02 │ contains  │  3/3   │   3/3   │
+│ qa-03 │ contains  │  3/3   │   3/3   │
+│ qa-04 │ contains  │  3/3   │   3/3   │
+│ qa-05 │ contains  │  3/3   │   3/3   │
+└───────┴───────────┴────────┴─────────┘
+```
 
 ## Reproducing
 
