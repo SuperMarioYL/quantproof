@@ -74,8 +74,8 @@
         "zh": "整夜无人值守，一次只起一个服务"
       },
       "body": {
-        "en": "A single CLI spawns one llama-server child per variant, samples k times per task, kills it and moves on. No daemon, no database, no telemetry.",
-        "zh": "一个 CLI，每个档位起一个 llama-server 子进程，每个任务采样 k 次，跑完即退、换下一个。没有守护进程、没有数据库、没有遥测。"
+        "en": "A single CLI spawns one llama-server child per variant, samples k times per task, kills it and moves on. If the port already has a listener, the run refuses to start instead of measuring the wrong server. No daemon, no database, no telemetry.",
+        "zh": "一个 CLI，每个档位起一个 llama-server 子进程，每个任务采样 k 次，跑完即退、换下一个。如果端口上已有监听进程，运行会拒绝启动，而不是测错服务器。没有守护进程、没有数据库、没有遥测。"
       }
     }
   ],
@@ -141,8 +141,8 @@
           "zh": "今天能接什么"
         },
         "body": {
-          "en": "v0.1 works with GGUF files you already have on disk and llama.cpp's llama-server on PATH — any model, any quantizer, because the pack and the graders are model-agnostic. Task packs are plain tasks.json you author; the example packs ship under examples/. Auto-download from a GGUF repo (honoring HF_ENDPOINT mirrors), resumable runs and the gistable report.md are m2 and not implemented yet.",
-          "zh": "v0.1 直接用你磁盘上已有的 GGUF 文件和 PATH 里的 llama.cpp llama-server——任意模型、任意量化作者，因为任务包和判分器与模型无关。任务包就是你自己写的 tasks.json，示例包在 examples/ 下。从 GGUF 仓库自动下载（支持 HF_ENDPOINT 镜像）、断点续跑和可分享的 report.md 属于 m2，尚未实现。"
+          "en": "v0.2 works with GGUF files you already have on disk and llama.cpp's llama-server on PATH — any model, any quantizer, because the pack and the graders are model-agnostic. Task packs are plain tasks.json you author; the example packs ship under examples/. Every run writes the gistable report.md and machine-readable results.json (v0.2.0). Auto-download from a GGUF repo (honoring HF_ENDPOINT mirrors) and resumable runs remain m2 and are not implemented yet.",
+          "zh": "v0.2 直接用你磁盘上已有的 GGUF 文件和 PATH 里的 llama.cpp llama-server——任意模型、任意量化作者，因为任务包和判分器与模型无关。任务包就是你自己写的 tasks.json，示例包在 examples/ 下。每次运行都会写出可分享的 report.md 和机器可读的 results.json（v0.2.0）。从 GGUF 仓库自动下载（支持 HF_ENDPOINT 镜像）与断点续跑仍属于 m2，尚未实现。"
         },
         "image": {
           "light": "/assets/presentation/integrations-light.svg",
@@ -165,8 +165,8 @@
           "zh": "命令与选项"
         },
         "body": {
-          "en": "doctor checks llama-server and GPU visibility; init scaffolds the example pack; rank runs the calibration. rank options: --gguf (repeat, or pass several space-separated), --tasks, --k to override the pack's samples per task, --port (default 8111), --startup-timeout, and --server-bin for a llama-server-compatible wrapper.",
-          "zh": "doctor 检查 llama-server 与 GPU；init 生成示例任务包；rank 跑校准。rank 的选项：--gguf（可重复传，也可以空格连传多个）、--tasks、--k 覆盖每个任务的采样次数、--port（默认 8111）、--startup-timeout，以及用于兼容包装器的 --server-bin。"
+          "en": "doctor checks llama-server and GPU visibility; init scaffolds the example pack; rank runs the calibration. rank options: --gguf (repeat, or pass several space-separated), --tasks, --k to override the pack's samples per task, --port (default 8111), --startup-timeout, --server-bin for a llama-server-compatible wrapper, and --out to choose where report.md and results.json land.",
+          "zh": "doctor 检查 llama-server 与 GPU；init 生成示例任务包；rank 跑校准。rank 的选项：--gguf（可重复传，也可以空格连传多个）、--tasks、--k 覆盖每个任务的采样次数、--port（默认 8111）、--startup-timeout，用于兼容包装器的 --server-bin，以及指定 report.md 与 results.json 落盘位置的 --out。"
         },
         "code": "quantproof doctor\nquantproof init\nquantproof rank --gguf Q4_K_M.gguf IQ2_XXS.gguf IQ1_S.gguf --tasks ./tasks"
       },
@@ -176,8 +176,8 @@
           "zh": "配置与边界"
         },
         "body": {
-          "en": "Task-pack fields: base_model (informational), k_samples, and tasks with id, prompt and a grader — codeblock (test_cmd, optional filename, timeout_s) or contains (expected). Code graders run shell commands you wrote, with the same trust as CI scripts. v0.1 is llama.cpp-only, deterministic-graders-only, local-files-only.",
-          "zh": "任务包字段：base_model（仅记录用）、k_samples，以及带 id、prompt 和判分器的任务——codeblock（test_cmd，可选 filename、timeout_s）或 contains（expected）。代码判分器会执行你写的 shell 命令，信任级别与 CI 脚本相同。v0.1 仅支持 llama.cpp、仅确定性判分、仅本地文件。"
+          "en": "Task-pack fields: base_model (informational), k_samples, and tasks with id, prompt and a grader — codeblock (test_cmd, optional filename, timeout_s) or contains (expected). Code graders run shell commands you wrote, with the same trust as CI scripts. v0.2 is llama.cpp-only, deterministic-graders-only, local-files-only, and refuses to start when the chosen port already has a listener.",
+          "zh": "任务包字段：base_model（仅记录用）、k_samples，以及带 id、prompt 和判分器的任务——codeblock（test_cmd，可选 filename、timeout_s）或 contains（expected）。代码判分器会执行你写的 shell 命令，信任级别与 CI 脚本相同。v0.2 仅支持 llama.cpp、仅确定性判分、仅本地文件，且在所选端口已有监听时拒绝启动。"
         },
         "code": "python -m pip install -e \".[test]\"\npython -m pytest"
       }
@@ -189,8 +189,8 @@
       "zh": "真实运行记录"
     },
     "note": {
-      "en": "Commands and outputs below are copied verbatim from a real 0.1.0 run captured non-interactively. llama-server was not installed on the recording machine, so step 3 substitutes the deterministic stub server from tests/ via --server-bin: spawn, health wait, sampling, both graders and the collapse-delta table are the real code paths, but pass rates and tok/s demonstrate the pipeline, not quant quality.",
-      "zh": "以下命令与输出逐字复制自 0.1.0 的真实运行（非交互捕获，进度条显示为普通状态行）。录制机器上没有安装 llama-server，第 3 步用 tests/ 下的确定性 stub 服务通过 --server-bin 代替：进程管理、健康检查、采样、两种判分器和坍缩差值表都是真实代码路径，但通过率与 tok/s 展示的是流水线机制，不代表量化质量。"
+      "en": "Commands and outputs below are copied verbatim from a real 0.1.0 run captured non-interactively. llama-server was not installed on the recording machine, so step 3 substitutes the deterministic stub server from tests/ via --server-bin: spawn, health wait, sampling, both graders and the collapse-delta table are the real code paths, but pass rates and tok/s demonstrate the pipeline, not quant quality. Recorded at 0.1.0; since v0.2.0 every rank run also writes report.md and results.json next to the run.",
+      "zh": "以下命令与输出逐字复制自 0.1.0 的真实运行（非交互捕获，进度条显示为普通状态行）。录制机器上没有安装 llama-server，第 3 步用 tests/ 下的确定性 stub 服务通过 --server-bin 代替：进程管理、健康检查、采样、两种判分器和坍缩差值表都是真实代码路径，但通过率与 tok/s 展示的是流水线机制，不代表量化质量。 录制于 0.1.0；自 v0.2.0 起，每次 rank 运行还会在运行目录写出 report.md 和 results.json。"
     },
     "source": "https://github.com/SuperMarioYL/quantproof/blob/main/docs/demo-results.json",
     "steps": [
@@ -275,25 +275,32 @@
           "zh": "真实运行"
         },
         "code": "quantproof rank --gguf model.Q4_K_M.gguf model.IQ2_XXS.gguf --tasks ./tasks"
+      },
+      {
+        "title": {
+          "en": "Share the report",
+          "zh": "分享报告"
+        },
+        "code": "cat report.md   # gistable ranked report written next to the run\n# results.json carries the same calibration for tooling (--out DIR to relocate)"
       }
     ]
   },
   "limitations": [
     {
-      "en": "v0.1 works with GGUF files already on disk; downloading variants from a GGUF repo (--gguf-repo / --quants) is m2 and not implemented.",
-      "zh": "v0.1 只用磁盘上已有的 GGUF 文件；从 GGUF 仓库下载档位（--gguf-repo / --quants）属于 m2，尚未实现。"
+      "en": "Works with GGUF files already on disk; downloading variants from a GGUF repo (--gguf-repo / --quants) is m2 and not implemented.",
+      "zh": "只用磁盘上已有的 GGUF 文件；从 GGUF 仓库下载档位（--gguf-repo / --quants）属于 m2，尚未实现。"
     },
     {
-      "en": "llama.cpp llama-server is the only backend; no Ollama, vLLM or transformers in v0.1.",
-      "zh": "v0.1 仅支持 llama.cpp llama-server 后端；不支持 Ollama、vLLM 或 transformers。"
+      "en": "llama.cpp llama-server is the only backend; no Ollama, vLLM or transformers.",
+      "zh": "仅支持 llama.cpp llama-server 后端；不支持 Ollama、vLLM 或 transformers。"
     },
     {
       "en": "Graders are deterministic only (shell test commands and substring checks); no LLM-as-judge.",
       "zh": "判分只做确定性（shell 测试命令与子串检查）；不使用 LLM 裁判。"
     },
     {
-      "en": "The gistable report.md and results.json artifacts and crash-resumable runs are m2; v0.1 prints the terminal report only.",
-      "zh": "可分享的 report.md、results.json 产物与断点续跑属于 m2；v0.1 只输出终端报告。"
+      "en": "report.md and results.json are written after every run (v0.2.0); crash-resumable runs stay m2.",
+      "zh": "每次运行都会写出 report.md 与 results.json（v0.2.0）；断点续跑仍属于 m2。"
     }
   ],
   "cta": {
