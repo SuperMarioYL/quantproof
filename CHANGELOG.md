@@ -4,6 +4,29 @@ All notable changes to QuantProof are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-10-13
+
+### Fixed
+
+- `quantproof init --dir` no longer dies with a raw `FileExistsError` /
+  `PermissionError` traceback when the target exists as a file or sits under
+  an unwritable parent; it prints the friendly error and exits 1 like every
+  other command.
+- `quantproof rank` now fails fast with a clear message when the chosen port
+  already has a listener, instead of silently benchmarking whatever stale
+  server occupies it — a scenario that produced confident but wrong collapse
+  tables.
+
+### Added
+
+- `rank` writes the gistable `report.md` (ranked table, collapse call-outs,
+  per-task matrix) and machine-readable `results.json` after every run, next
+  to the invocation or under `--out DIR`. First slice of the m2 report
+  contract.
+- Release workflow builds the wheel and sdist and attaches them to GitHub
+  releases on `v*` tags (releases were previously bare tags with no
+  artifacts).
+
 ## [0.1.0] — 2026-09-09
 
 ### Added

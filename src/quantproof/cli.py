@@ -1,9 +1,10 @@
 """The quantproof CLI: doctor, init, rank.
 
 m1 scope: run local GGUF variants against a task pack and print the ranked
-table with collapse deltas. Auto-download of variants (``--gguf-repo`` /
-``--quants``), resumable results.jsonl runs and the gistable report.md are
-m2 milestones and are not implemented yet.
+table with collapse deltas. Every rank run also writes the gistable
+``report.md`` and machine-readable ``results.json`` (v0.2.0). Auto-download
+of variants (``--gguf-repo`` / ``--quants``) and resumable results.jsonl
+runs are m2 milestones and are not implemented yet.
 """
 
 from __future__ import annotations
@@ -28,7 +29,7 @@ from rich.progress import (
 
 from quantproof import __version__
 from quantproof.models import TaskPack
-from quantproof.report import print_report
+from quantproof.report import print_report, write_run_artifacts
 from quantproof.resolve import resolve_variants
 from quantproof.runner import INSTALL_HINT, Runner, RunnerError, SampleRecord
 from quantproof.taskpack import TaskPackError, load_task_pack, scaffold_example_pack
@@ -159,6 +160,13 @@ def rank(
             help="llama-server-compatible command (advanced; e.g. a wrapper or the test stub)",
         ),
     ] = "llama-server",
+    out: Annotated[
+        Path,
+        typer.Option(
+            "--out",
+            help="Directory for report.md and results.json (created when missing)",
+        ),
+    ] = Path("."),
 ) -> None:
     """Run every GGUF variant against the task pack and print the ranked table."""
     try:
@@ -193,7 +201,13 @@ def rank(
             err_console.print(f"[red]error:[/red] {exc}")
             raise typer.Exit(code=1) from exc
 
-    print_report(pack, runs, console)
+    calibration = print_report(pack, runs, console)
+    try:
+        report_path, results_path = write_run_artifacts(out, calibration, pack)
+    except OSError as exc:
+        err_console.print(f"[red]error:[/red] cannot write report artifacts: {exc}")
+        raise typer.Exit(code=1) from exc
+    console.print(f"\nreport written to [bold]{report_path}[/bold] (+ {results_path.name})")
 
 
 def _run_with_progress(

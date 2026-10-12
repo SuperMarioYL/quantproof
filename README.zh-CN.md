@@ -11,7 +11,7 @@
 公开的量化对比表排的是别人任务上的名次。QuantProof 把同一个模型的每个量化档位跑一遍*你的*任务包，直接显示质量在你的负载上哪里坍缩——不用再花一个周末和 40 GB 下载去手动验证。
 
 [![CI](https://github.com/SuperMarioYL/quantproof/actions/workflows/ci.yml/badge.svg)](https://github.com/SuperMarioYL/quantproof/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-0.1.0-e65662)](https://github.com/SuperMarioYL/quantproof/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-e65662)](https://github.com/SuperMarioYL/quantproof/releases)
 [![Python](https://img.shields.io/badge/python-3.12%2B-3776ab)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-e65662)](./LICENSE)
 ![Local](https://img.shields.io/badge/local_only-no_telemetry-e65662)
@@ -58,7 +58,7 @@ printf '(stub)' > Q4_K_M.demo.gguf && printf '(stub)' > IQ2_XXS.demo.gguf && \
 quantproof rank --gguf model.Q4_K_M.gguf model.IQ2_XXS.gguf --tasks ./tasks
 ```
 
-这就是全部流程：一次一条命令，每个档位一个 `llama-server` 子进程，结束时输出排名表。真实运行前可先跑 `quantproof doctor`，它会检查 `llama-server` 是否在 PATH 上并报告 GPU 可见性，缺失时给出安装提示。
+这就是全部流程：一次一条命令，每个档位一个 `llama-server` 子进程，结束时输出排名表——并在运行目录写下可 gist 的 `report.md` 和机器可读的 `results.json`（用 `--out DIR` 换位置）。真实运行前可先跑 `quantproof doctor`，它会检查 `llama-server` 是否在 PATH 上并报告 GPU 可见性，缺失时给出安装提示。
 
 ## <img src="assets/icons/video.svg" width="22" alt=""> 运行记录
 
@@ -201,8 +201,9 @@ Schema：
 | `--port` | `8111` | `llama-server` 子进程端口 |
 | `--startup-timeout` | `600` | 等待 `/health` 的秒数（大模型加载慢） |
 | `--server-bin` | `llama-server` | 进阶：llama-server 兼容命令（包装器、容器封装或测试 stub） |
+| `--out` | `.` | `report.md` 与 `results.json` 的输出目录，不存在时自动创建 |
 
-档位标签从文件名解析（`Model-27B.Q4_K_M.gguf` → `Q4_K_M`）；识别不出量化标签的文件回退用文件名主干。单个采样出错只记为失败、运行继续——整夜扫描不会因一次抖动而中断。
+档位标签从文件名解析（`Model-27B.Q4_K_M.gguf` → `Q4_K_M`）；识别不出量化标签的文件回退用文件名主干。单个采样出错只记为失败、运行继续——整夜扫描不会因一次抖动而中断。如果所选端口上已有监听进程（例如上次崩溃残留的 `llama-server`），运行会直接拒绝启动，而不是悄悄拿错误的服务器当基准。
 
 ## <img src="assets/icons/chart-bar.svg" width="22" alt=""> 能力与集成
 
@@ -219,7 +220,7 @@ Schema：
 | 后端 | 仅 llama.cpp `llama-server`，走其 OpenAI 兼容的 `/v1/chat/completions` |
 | 代码判分 | 你自己的 shell 测试命令（`cc`、`diff`、`grep`、pytest……），在隔离临时目录执行 |
 | 问答判分 | 精确子串检查 |
-| 输出 | rich 排名表（含坍缩差值）与逐任务矩阵 |
+| 输出 | rich 排名表（含坍缩差值）与逐任务矩阵，外加每次运行写出的 `report.md` 和 `results.json` 产物 |
 | 示例包 | `examples/` 下的 C 编码与通用问答包，`init` 内置 10 题包 |
 
 ## <img src="assets/icons/settings.svg" width="22" alt=""> 配置与边界
@@ -227,13 +228,14 @@ Schema：
 - **v0.1 只用磁盘上已有的 GGUF 文件。** 从 GGUF 仓库下载档位（`--gguf-repo` / `--quants`）属于 m2，尚未实现；`HF_ENDPOINT` 镜像支持也随之一并到来。在那之前 QuantProof 本身零网络请求。
 - **仅支持 llama.cpp。** v0.1 没有 Ollama、vLLM 或 transformers 后端；任务包与报告格式与后端无关，其他后端属于路线图。
 - **仅确定性判分。** 不用 LLM 裁判；同一任务包重跑结论一致（模型采样本身除外——k 次采样正是为了测量这个方差）。
-- **仅终端报告。** 可 gist 的 `report.md` / `results.json` 产物和断点续跑属于 m2。
+- **终端报告加磁盘产物。** 每次运行都会写出可 gist 的 `report.md` 与机器可读的 `results.json`（v0.2.0）；断点续跑的 `results.jsonl` 仍属 m2。
 - **坍缩标记阈值**：比最优档位低超过 10 个百分点的档位会在表格下方单独点名。
 
 ## <img src="assets/icons/route.svg" width="22" alt=""> 路线图
 
-- [x] **v0.1（当前，m1）**——任务包 schema、两种判分器、llama-server 编排、带坍缩差值与逐任务矩阵的排名表、`init` + `doctor`
-- [ ] **m2**——按 GGUF 仓库解析量化名并自动下载档位（支持 `HF_ENDPOINT` 镜像）；断点续跑；可 gist 的 `results.json` + `report.md`
+- [x] **v0.1（m1）**——任务包 schema、两种判分器、llama-server 编排、带坍缩差值与逐任务矩阵的排名表、`init` + `doctor`
+- [x] **v0.2（当前）**——每次运行写出可 gist 的 `report.md` + `results.json`（`--out DIR`）、端口占用守卫、`init` 友好报错、GitHub release 附带 wheel + sdist
+- [ ] **m2（剩余）**——按 GGUF 仓库解析量化名并自动下载档位（支持 `HF_ENDPOINT` 镜像）；断点续跑
 - [ ] **m3**——一小时内跑完的三档位快速模式作为默认首次运行，附真实 GPU 演示录制
 
 v0.1 不做：Web 界面或托管榜单、llama.cpp 之外的后端、LLM 裁判判分、生成或调优量化（本工具只排名、不生成）、多 GPU 或多机运行、任何形式的账号与遥测。

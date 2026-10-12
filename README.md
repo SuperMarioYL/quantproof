@@ -11,7 +11,7 @@
 Published quant tables rank variants on someone else's tasks. QuantProof runs every quant variant of one model against *your* task pack and shows exactly where quality collapses on your workload — before you spend a weekend and 40 GB of downloads finding out by hand.
 
 [![CI](https://github.com/SuperMarioYL/quantproof/actions/workflows/ci.yml/badge.svg)](https://github.com/SuperMarioYL/quantproof/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-0.1.0-e65662)](https://github.com/SuperMarioYL/quantproof/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-e65662)](https://github.com/SuperMarioYL/quantproof/releases)
 [![Python](https://img.shields.io/badge/python-3.12%2B-3776ab)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-e65662)](./LICENSE)
 ![Local](https://img.shields.io/badge/local_only-no_telemetry-e65662)
@@ -58,7 +58,7 @@ Run it for real, on GGUFs you already have:
 quantproof rank --gguf model.Q4_K_M.gguf model.IQ2_XXS.gguf --tasks ./tasks
 ```
 
-That is the whole loop: one command per run, one `llama-server` child per variant, and a ranked table at the end. Before a real run, `quantproof doctor` checks that `llama-server` is on PATH and reports GPU visibility with install hints.
+That is the whole loop: one command per run, one `llama-server` child per variant, and a ranked table at the end — plus a gistable `report.md` and a machine-readable `results.json` written next to the run (`--out DIR` to relocate). Before a real run, `quantproof doctor` checks that `llama-server` is on PATH and reports GPU visibility with install hints.
 
 ## <img src="assets/icons/video.svg" width="22" alt=""> Recorded demo
 
@@ -201,8 +201,9 @@ The schema:
 | `--port` | `8111` | Port for the `llama-server` child |
 | `--startup-timeout` | `600` | Seconds to wait for `/health` (big models load slowly) |
 | `--server-bin` | `llama-server` | Advanced: a llama-server-compatible command (wrapper, container shim, or the test stub) |
+| `--out` | `.` | Directory for `report.md` and `results.json`, created when missing |
 
-Variant labels are parsed from filenames (`Model-27B.Q4_K_M.gguf` → `Q4_K_M`); files without a recognizable quant tag fall back to the file stem. A sample that errors is recorded as failed and the run continues — an overnight sweep does not die on one flaky request.
+Variant labels are parsed from filenames (`Model-27B.Q4_K_M.gguf` → `Q4_K_M`); files without a recognizable quant tag fall back to the file stem. A sample that errors is recorded as failed and the run continues — an overnight sweep does not die on one flaky request. If the chosen port already has a listener (for example a stale `llama-server` from a crashed run), the run refuses to start rather than silently benchmark the wrong server.
 
 ## <img src="assets/icons/chart-bar.svg" width="22" alt=""> Capabilities and integrations
 
@@ -219,7 +220,7 @@ Variant labels are parsed from filenames (`Model-27B.Q4_K_M.gguf` → `Q4_K_M`);
 | Backend | llama.cpp `llama-server` only, via its OpenAI-compatible `/v1/chat/completions` |
 | Code grading | Your own shell test commands (`cc`, `diff`, `grep`, pytest, ...) in an isolated temp dir |
 | QA grading | Exact substring checks |
-| Output | rich-ranked terminal table with collapse deltas and a per-task matrix |
+| Output | rich-ranked terminal table with collapse deltas and a per-task matrix, plus `report.md` and `results.json` artifacts per run |
 | Example packs | C-coding and general-QA under `examples/`, bundled 10-task pack via `init` |
 
 ## <img src="assets/icons/settings.svg" width="22" alt=""> Configuration and limits
@@ -227,13 +228,14 @@ Variant labels are parsed from filenames (`Model-27B.Q4_K_M.gguf` → `Q4_K_M`);
 - **v0.1 works with GGUF files already on disk.** Downloading variants from a GGUF repo (`--gguf-repo` / `--quants`) is m2 and not implemented; `HF_ENDPOINT` mirror support lands with it. Until then QuantProof itself makes zero network calls.
 - **llama.cpp only.** No Ollama, vLLM or transformers backends in v0.1; task packs and reports are backend-independent, so other backends are a matter of roadmap.
 - **Deterministic graders only.** No LLM-as-judge; a rerun of the same pack reproduces the same verdicts (up to model sampling itself — k samples exist precisely to measure that variance).
-- **Terminal report only.** The gistable `report.md` / `results.json` artifacts and crash-resumable `results.jsonl` runs are m2.
+- **Terminal report plus on-disk artifacts.** Every run writes the gistable `report.md` and machine-readable `results.json` (v0.2.0); crash-resumable `results.jsonl` runs stay m2.
 - **Collapse flag threshold**: variants more than 10 percentage points below the best are called out in the table footer.
 
 ## <img src="assets/icons/route.svg" width="22" alt=""> Roadmap
 
-- [x] **v0.1 (current, m1)** — task-pack schema, both graders, llama-server orchestration, ranked table with collapse deltas and per-task matrix, `init` + `doctor`
-- [ ] **m2** — resolve quant names against a GGUF repo and auto-download variants (honoring `HF_ENDPOINT`); crash-resumable runs; gistable `results.json` + `report.md`
+- [x] **v0.1 (m1)** — task-pack schema, both graders, llama-server orchestration, ranked table with collapse deltas and per-task matrix, `init` + `doctor`
+- [x] **v0.2 (current)** — gistable `report.md` + `results.json` written after every run (`--out DIR`), port-collision guard, friendly `init` errors, wheel + sdist attached to GitHub releases
+- [ ] **m2 (remaining)** — resolve quant names against a GGUF repo and auto-download variants (honoring `HF_ENDPOINT`); crash-resumable runs
 - [ ] **m3** — a sub-one-hour three-variant quick mode as the documented default first run, plus a real-GPU demo recording
 
 Not planned for v0.1: web UI or hosted leaderboard, backends beyond llama.cpp, LLM-as-judge grading, creating or tuning quants (this tool ranks, never generates), multi-GPU or multi-host runs, accounts or telemetry of any kind.

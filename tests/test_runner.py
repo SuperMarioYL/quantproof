@@ -185,7 +185,12 @@ class TestRunnerSampling:
 
 
 class TestRankEndToEnd:
-    def test_rank_cli_prints_ranked_table_with_collapse_delta(self, tmp_path: Path) -> None:
+    def test_rank_cli_prints_ranked_table_with_collapse_delta(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # rank now writes report.md/results.json into the working directory;
+        # keep that out of the repo checkout under test.
+        monkeypatch.chdir(tmp_path)
         pack_dir = tmp_path / "tasks"
         pack_dir.mkdir()
         (pack_dir / "tasks.json").write_text(
@@ -344,10 +349,13 @@ class TestSplitStackedGguf:
             text=True,
             timeout=120,
             check=False,
+            cwd=str(tmp_path),  # rank writes report artifacts into its CWD
         )
         assert proc.returncode == 0, proc.stderr + proc.stdout
         assert "baseline" in proc.stdout
         assert "Q4_K_M" in proc.stdout and "IQ2_XXS" in proc.stdout
+        assert (tmp_path / "report.md").is_file()
+        assert (tmp_path / "results.json").is_file()
 
 
 def test_variantrun_helpers() -> None:

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quantproof"
-version = "0.1.0"
+version = "0.2.0"
 description = "Benchmark tool for local LLM developers to rank quant variants on their own tasks."
 readme = "README.md"
 license = "MIT"

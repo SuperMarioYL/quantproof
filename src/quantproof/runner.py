@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import shlex
 import shutil
+import socket
 import subprocess
 import tempfile
 import time
@@ -99,6 +100,7 @@ class Runner:
     ) -> VariantRun:
         """Spawn the server for one variant, collect k samples per task, kill it."""
         run = VariantRun(variant=variant.label, gguf_path=variant.path, size_gb=variant.size_gb)
+        self._ensure_port_free()
         proc, log = self._spawn_server(variant)
         try:
             self._wait_for_health(proc, log)
@@ -120,6 +122,22 @@ class Runner:
         return run
 
     # -- server lifecycle ---------------------------------------------------
+
+    def _ensure_port_free(self) -> None:
+        """Refuse to run when something else already listens on our port.
+
+        _wait_for_health accepts the first HTTP 200 it sees on the port, so a
+        stale llama-server left behind by a crashed run would otherwise serve
+        the whole calibration silently; probe the port before spawning.
+        """
+        try:
+            socket.create_connection(("127.0.0.1", self.port), timeout=0.5).close()
+        except OSError:
+            return
+        raise RunnerError(
+            f"port {self.port} already has a listener — stop that process, "
+            f"or pass --port <n> to pick another one"
+        )
 
     def _resolve_binary(self) -> str:
         """Fail clearly before spawning when the server binary is absent."""

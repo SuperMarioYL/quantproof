@@ -59,11 +59,17 @@ def read_bundled_pack() -> str:
 
 def scaffold_example_pack(dest: Path) -> Path:
     """Write the bundled 10-task example pack into ``dest/tasks.json``."""
-    dest.mkdir(parents=True, exist_ok=True)
     pack_file = dest / PACK_FILENAME
-    if pack_file.exists():
-        raise TaskPackError(
-            f"{pack_file} already exists — pick another directory or remove it first"
-        )
-    pack_file.write_text(read_bundled_pack(), encoding="utf-8")
+    try:
+        dest.mkdir(parents=True, exist_ok=True)
+        if pack_file.exists():
+            raise TaskPackError(
+                f"{pack_file} already exists — pick another directory or remove it first"
+            )
+        pack_file.write_text(read_bundled_pack(), encoding="utf-8")
+    except OSError as exc:
+        # exist_ok only covers an existing directory: a file at dest or an
+        # unwritable parent must surface as the CLI's friendly error, not a
+        # raw traceback.
+        raise TaskPackError(f"cannot scaffold {dest}: {exc}") from exc
     return pack_file
